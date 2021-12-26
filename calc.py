@@ -1,10 +1,23 @@
 #!/usr/bin/env python
 from math import pi, pow, sqrt
+import matplotlib.pyplot as plt
 
 import numpy as np
 
 #from scripts.const import PLOT_RANGE
-
+def calc_avoid_obs_vector(X,precMat, covMat, means):
+            avoid_obs_vector = np.array( [0,0] )
+            mu = means
+            Sxx = covMat[0][0]
+            Syy = covMat[1][1]
+            Sxy  = covMat[0][0]
+            rho = (Sxx*Syy-Sxy**2)
+            w = 1/(2*pi*rho**0.5)
+            K = -0.5 * np.matmul( np.matmul( (X-mu) ,precMat ) , (X-mu).T)
+            coefficient = w*np.exp(K)
+            avoid_obs_vector += coefficient * np.matmul( (X-mu) , precMat )
+            
+            return avoid_obs_vector
 
 def euclidean_distance(odom, goal_pose):
     # Euclidean distance between current location and the goal
@@ -31,7 +44,7 @@ def next_goal_angle(grad_x, grad_y):
 def angular_vel(current_orientation, direction_vector):
     # calculating angular velocity. determine weather to go CW or CWC. 
     # all angles must be positive in respect to x axis
-    alpha = next_goal_angle(direction_vector.x, direction_vector.y)
+    alpha = next_goal_angle(direction_vector[0], direction_vector[1])
     teta = current_orientation
 
     if abs(alpha - teta) > pi:
@@ -94,6 +107,9 @@ def print_reached_msg():
     print("waiting for a different goal.")
     print("==============================")
 
+def plot_obs(x_array,y_array):
+    plt.plot(x_array, y_array, 'ro')
+    plt.show()
 
 #def plot_gradient(gradient,cur_x,cur_y):
 #    
